@@ -12,8 +12,11 @@ sheet = client.open('Coupon').sheet1
 
 pp=pprint.PrettyPrinter()
 coupon = sheet.get_all_values()
-pp.pprint(coupon)
+coupon_code = input('Enter a coupon code: ')
+coupon_code = coupon_code.split('.')
+
+# pp.pprint(coupon)
 for i in range(len(coupon)):
-    sheet.update_cell(i+1,2,''.join(random.choices(string.ascii_uppercase + string.digits, k=3)))
+    sheet.update_cell(i+1,2,str(i+1)+'.'+''.join(random.choices(string.ascii_uppercase + string.digits, k=2)))
 
 pp.pprint(coupon)
