@@ -4,6 +4,7 @@ import pprint
 import random
 import string
 import datetime
+import smtplib
 import sys
 
 print('Connecting to Google Sheets....')
@@ -14,8 +15,8 @@ creds = ServiceAccountCredentials.from_json_keyfile_name(
 client = gspread.authorize(creds)
 
 sheet = client.open('Coupon').sheet1
-pp=pprint.PrettyPrinter()
 
+pp = pprint.PrettyPrinter()
 
 
 while True:
@@ -31,7 +32,7 @@ while True:
                 cell_list = sheet.range('C1:C'+str(len(coupon)))
 
                 for cell in cell_list:
-                    cell.value = 'O'
+                    cell.value = '0'
 
                 # Update in batch
                 sheet.update_cells(cell_list)
@@ -69,7 +70,7 @@ while True:
 
             if managementMode == '4':
                 pp.pprint(coupon)
-            
+                
             if managementMode == 'quit':
                 break
 
@@ -93,6 +94,6 @@ while True:
             except:
                 print('\n!!Coupon is invalid!!')
                 pass
-                
+
     if mode == "quit":
         break
