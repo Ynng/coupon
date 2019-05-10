@@ -4,6 +4,7 @@ import pprint
 import random
 import string
 import datetime
+import sys
 
 print('Connecting to Google Sheets....')
 scope = ['https://spreadsheets.google.com/feeds',
@@ -13,68 +14,85 @@ creds = ServiceAccountCredentials.from_json_keyfile_name(
 client = gspread.authorize(creds)
 
 sheet = client.open('Coupon').sheet1
+pp=pprint.PrettyPrinter()
 
-mode = input('Enter 0 for managements, 1 for coupon redeeming\n')
 
-if mode == '0':
-    print("Updating coupons")
-    coupon = sheet.get_all_values()
-    managementMode = input(
-        '0 to make all coupons valid\n1 to make all coupons invalid\n2 to generate coupons for new emails\n3 to force regenerate coupons for everyone\n')
-    if managementMode == 0:
-        # Select a range
-        cell_list = sheet.range('C1:C'+str(len(coupon)))
 
-        for cell in cell_list:
-            cell.value = 'O'
+while True:
+    mode = input('Enter 0 for managements, 1 for coupon redeeming\n')
+    if mode == '0':
+        while True:
+            print("Updating coupons")
+            coupon = sheet.get_all_values()
+            managementMode = input(
+                '0 to make all coupons valid\n1 to make all coupons invalid\n2 to generate coupons for new emails\n3 to force regenerate coupons for everyone\n4 to look at all coupons\nquit to quit\n')
+            if managementMode == '0':
+                # Select a range
+                cell_list = sheet.range('C1:C'+str(len(coupon)))
 
-        # Update in batch
-        sheet.update_cells(cell_list)
-        print('All coupons are now valid')
+                for cell in cell_list:
+                    cell.value = 'O'
 
-    if managementMode == 1:
-        currentTimeString = str(datetime.datetime.now())
-        # Select a range
-        cell_list = sheet.range('C1:C'+str(len(coupon)))
+                # Update in batch
+                sheet.update_cells(cell_list)
+                print('All coupons are now valid')
 
-        for cell in cell_list:
-            cell.value = currentTimeString
+            if managementMode == '1':
+                currentTimeString = str(datetime.datetime.now())
+                # Select a range
+                cell_list = sheet.range('C1:C'+str(len(coupon)))
 
-        # Update in batch
-        sheet.update_cells(cell_list)
-        print('All coupons are now invalid')
+                for cell in cell_list:
+                    cell.value = currentTimeString
 
-    if managementMode == 2:
-        counter = 0
-        for i in range(len(coupon)):
-            if coupon[i][1] == '':
-                counter += 1
-                sheet.update_cell(i+1, 2, str(i+1)+'.' +
-                                  ''.join(random.choices(string.ascii_uppercase)))
-                sheet.update_cell(i+1, 3, '0')
-        print('Added a total of '+str(counter)+' coupons')
+                # Update in batch
+                sheet.update_cells(cell_list)
+                print('All coupons are now invalid')
 
-    if managementMode == 3:
-        counter = 0
-        for i in range(len(coupon)):
-            sheet.update_cell(i+1, 2, str(i+1)+'.' +
-                              ''.join(random.choices(string.ascii_uppercase)))
-            sheet.update_cell(i+1, 3, '0')
-        print('Changed a total of '+str(counter)+' coupons')
+            if managementMode == '2':
+                counter = 0
+                for i in range(len(coupon)):
+                    if coupon[i][1] == '':
+                        counter += 1
+                        sheet.update_cell(i+1, 2, str(i+1)+'.' +
+                                        ''.join(random.choices(string.ascii_uppercase)))
+                        sheet.update_cell(i+1, 3, '0')
+                print('Added a total of '+str(counter)+' coupons')
 
-if mode == '1':
-    while True:
-        print("Updating coupons list.....")
-        coupon = sheet.get_all_values()
-        coupon_code = input('\n\nEnter another coupon code to redeem it: ')
-        coupon_code_array = coupon_code.split('.')
-        try:
-            if coupon[int(coupon_code_array[0])-1][1] == coupon_code and coupon[int(coupon_code_array[0])-1][2] == '0':
-                print('\nCoupon is valid!\nYou just used your coupon! Enjoy :)')
-                sheet.update_cell(
-                    int(coupon_code_array[0]), 3, str(datetime.datetime.now()))
-            else:
+            if managementMode == '3':
+                counter = 0
+                for i in range(len(coupon)):
+                    sheet.update_cell(i+1, 2, str(i+1)+'.' +
+                                    ''.join(random.choices(string.ascii_uppercase)))
+                    sheet.update_cell(i+1, 3, '0')
+                print('Changed a total of '+str(counter)+' coupons')
+
+            if managementMode == '4':
+                pp.pprint(coupon)
+            
+            if managementMode == 'quit':
+                break
+
+    if mode == '1':
+        while True:
+            print("Updating coupons list.....")
+            coupon = sheet.get_all_values()
+            coupon_code = input('\n\nEnter another coupon code to redeem it: ')
+
+            if coupon_code == "quit":
+                break
+
+            coupon_code_array = coupon_code.split('.')
+            try:
+                if coupon[int(coupon_code_array[0])-1][1] == coupon_code and coupon[int(coupon_code_array[0])-1][2] == '0':
+                    print('\nCoupon is valid!\nYou just used your coupon! Enjoy :)')
+                    sheet.update_cell(
+                        int(coupon_code_array[0]), 3, str(datetime.datetime.now()))
+                else:
+                    print('\n!!Coupon is invalid!!')
+            except:
                 print('\n!!Coupon is invalid!!')
-        except:
-            print('\n!!Coupon is invalid!!')
-            pass
+                pass
+                
+    if mode == "quit":
+        break
