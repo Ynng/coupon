@@ -73,26 +73,6 @@ while True:
             if managementMode == '4':
                 pp.pprint(coupon)
 
-            if managementMode == '5':
-                recievers = ["wenqi1016@gmail.com", "kh.kevinhuang.03@gmail.com"]
-                msg = MIMEMultipart()
-                msg['Subject'] = 'Coupon'
-                msg['From'] = "lol233666@gmail.com"
-                msg['To'] = ', '.join(recievers)
-                msg.preamble = 'Our family reunion'
-                s = smtplib.SMTP('localhost')
-                s.sendmail("lol233666@gmail.com", recievers, msg.as_string())
-                s.quit()
-
-
-
-                # s = smtplib.SMTP('smtp.gmail.com', 587) 
-                # s.starttls() 
-                # s.login("sender_email_id", "sender_email_id_password") 
-                # message = "Message_you_need_to_send"
-                # s.sendmail("sender_email_id", "receiver_email_id", message) 
-                # s.quit()
-
             if managementMode == 'quit':
                 break
 
